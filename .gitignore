@@ -1,0 +1,15 @@
+node_modules/
+
+# Build artifacts
+backend/dist/
+frontend/dist/
+shared/dist/
+
+# Env files
+.env
+backend/.env
+frontend/.env
+
+# Logs
+*.log
+npm-debug.log*
