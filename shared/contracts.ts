@@ -58,3 +58,30 @@ export interface InsightResponse {
   summary: string;
   recommendations: string[];
 }
+
+// Request dari Frontend ke Backend
+export interface AnalysisRequest {
+  locationId: string; // Contoh: "Kecamatan Semarang Tengah"
+  businessType: string; // Contoh: "cafe", "barbershop", "fashion"
+}
+
+// Response dari Backend ke Frontend (Dummy dari AI)
+export interface AnalysisResponse {
+  success: boolean;
+  data: {
+    location: string;
+    businessType: string;
+    metrics: {
+      traffic_score: number;
+      transit_score: number;
+      poi_score: number;
+      competitor_count: number;
+      comp_ratio: number;
+    };
+    ai_prediction: {
+      final_score: number; // Skala 0 - 100
+      cluster: "Ramai" | "Potensial" | "Sepi";
+      insight: string; // Narasi buatan AI
+    };
+  };
+}
