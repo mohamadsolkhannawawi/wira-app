@@ -104,7 +104,19 @@ export const analysisService = {
   },
 
   async getHistory(userId: string, filters: Record<string, string | undefined>) {
-    return analysisRepository.findByUserId(userId, filters);
+    const result = await analysisRepository.findByUserId(userId, filters);
+    return {
+      total: result.total,
+      data: result.data.map((item) => ({
+        id: item.id,
+        locationName: item.locationName,
+        businessType: item.businessType,
+        finalScore: item.resultScore,
+        clusterLabel: item.clusterLabel,
+        isSaved: item.isSaved,
+        createdAt: item.createdAt.toISOString(),
+      })),
+    };
   },
 
   async toggleBookmark(id: string, userId: string) {

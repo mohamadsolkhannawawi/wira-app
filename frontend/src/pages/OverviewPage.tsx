@@ -15,7 +15,10 @@ import { SearchCard } from "../shared/SearchCard";
 import { Star, Info, History, AlertTriangle, ArrowRight } from "lucide-react";
 
 export function OverviewPage() {
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [result, setResult] = useState<AnalysisResult | null>(() => {
+    const saved = localStorage.getItem("wira_last_analysis");
+    return saved ? JSON.parse(saved) : null;
+  });
   const [locations, setLocations] = useState<LocationSummary[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -35,11 +38,24 @@ export function OverviewPage() {
     longitude: number;
   }) => {
     setLoading(true);
-    const analysis = await submitAnalysis(payload);
-    setResult(analysis);
-    const updated = await getLocations(payload.businessType);
-    setLocations(updated);
-    setLoading(false);
+    try {
+      const analysis = await submitAnalysis(payload);
+      setResult(analysis);
+      // Persist result to localStorage
+      localStorage.setItem("wira_last_analysis", JSON.stringify(analysis));
+      
+      const updated = await getLocations(payload.businessType);
+      setLocations(updated);
+    } catch (err) {
+      console.error("Analysis failed", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClear = () => {
+    setResult(null);
+    localStorage.removeItem("wira_last_analysis");
   };
 
   return (
@@ -201,7 +217,7 @@ export function OverviewPage() {
                 <SearchCard onSubmit={handleSubmit} isLoading={loading} />
               </div>
               <div id="insight" className="lg:col-span-7 scroll-mt-24">
-                <InsightCard result={result} isLoading={loading} />
+                <InsightCard result={result} isLoading={loading} onClear={handleClear} />
               </div>
             </div>
           </div>
