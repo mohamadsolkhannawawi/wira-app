@@ -12,6 +12,7 @@ import XLSX from "xlsx";
 import * as path from "path";
 import * as fs from "fs";
 import { fileURLToPath } from "url";
+import bcrypt from "bcryptjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -52,6 +53,22 @@ async function main() {
   }
 
   console.log("🌱 Starting WIRA seed...\n");
+  
+  // 0. Seed Test User
+  console.log("👤 Seeding test user...");
+  const hashedPassword = await bcrypt.hash("password123", 10);
+  await prisma.user.upsert({
+    where: { email: "user@wira.app" },
+    update: { password: hashedPassword }, // Ensure password is correct
+    create: {
+      email: "user@wira.app",
+      password: hashedPassword,
+      name: "WIRA User",
+      role: "USER",
+      isVerified: true,
+    },
+  });
+  console.log("   ✅ Test user seeded (user@wira.app / password123)\n");
 
   // 1. Seed BusinessTypeMaster
   console.log("📋 Seeding BusinessTypeMaster...");
