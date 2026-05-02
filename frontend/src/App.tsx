@@ -1,10 +1,11 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import { NotFoundPage } from "./pages/NotFoundPage.tsx";
-import { OverviewPage } from "./pages/OverviewPage.tsx";
-import { LoginPage } from "./pages/LoginPage.tsx";
-import { RegisterPage } from "./pages/RegisterPage.tsx";
-import { HistoryPage } from "./pages/HistoryPage.tsx";
-import { ComparePage } from "./pages/ComparePage.tsx";
+import { NotFoundPage } from "./pages/NotFoundPage";
+import { OverviewPage } from "./pages/OverviewPage";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { HistoryPage } from "./pages/HistoryPage";
+import { ComparePage } from "./pages/ComparePage";
+import { ProfilePage } from "./pages/ProfilePage";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/history" element={<HistoryPage />} />
       <Route path="/compare" element={<ComparePage />} />
+      <Route path="/profile" element={<ProfilePage />} />
       <Route path="*" element={<NotFoundPage />} />
       <Route path="/home" element={<Navigate to="/" replace />} />
     </Routes>
