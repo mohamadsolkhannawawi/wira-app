@@ -1,9 +1,16 @@
 import { Router } from "express";
-import { getAnalysis } from "../controllers/analysisController";
+import { analysisRouter } from "./analysis.routes.js";
+import { authRouter } from "./auth.routes.js";
+import { healthRouter } from "./health.routes.js";
+import { locationsRouter } from "./locations.routes.js";
+import { userRouter } from "./user.routes.js";
 
-const router = Router();
+const apiRouter = Router();
 
-// Endpoint yang akan ditembak oleh frontend
-router.post("/api/analyze", getAnalysis);
+apiRouter.use("/locations", locationsRouter);
+apiRouter.use(healthRouter);
+apiRouter.use(authRouter);
+apiRouter.use(analysisRouter);
+apiRouter.use(userRouter);
 
-export default router;
+export { apiRouter };

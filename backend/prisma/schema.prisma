@@ -1,13 +1,136 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String          @id @default(uuid())
+  email      String          @unique
+  password   String
+  name       String?
+  role       UserRole        @default(USER)
+  isVerified Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  searches   SearchHistory[]
+  tokens     RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model SearchHistory {
+  id              String          @id @default(uuid())
+  userId          String?
+  businessType    BusinessType
+  resultScore     Float
+  clusterLabel    ClusterLabel
+  insight         String          @db.Text
+  confidenceLevel ConfidenceLevel
+  isSaved         Boolean         @default(false)
+
+  locationName    String
+  kecamatan       String
+  latitude        Float
+  longitude       Float
+
+  trafficScore    Float
+  transitScore    Float
+  poiScore        Float
+  competitorScore Float
+  compRatio       Float
+
+  createdAt       DateTime        @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("search_histories")
+}
+
+model LocationData {
+  id              String       @id @default(uuid())
+  namaJalan        String
+  kecamatan       String
+  kelurahan       String
+  latCentroid     Float
+  lngCentroid     Float
+  businessType    BusinessType
+
+  trafficScore    Float
+  transitScore    Float
+  poiScore        Float
+  competitorCount Float
+  compRatio       Float
+
+  clusterLabel    ClusterLabel
+  finalScore      Float
+
+  dataVersion     String       @default("v1.0")
+  lastUpdated     DateTime     @default(now())
+
+  @@unique([kelurahan, businessType])
+  @@map("location_data")
+}
+
+model BusinessTypeMaster {
+  id                String       @id @default(uuid())
+  code              BusinessType @unique
+  label             String
+  description       String?
+  isActive          Boolean      @default(true)
+  weightTraffic     Float        @default(0.25)
+  weightTransit     Float        @default(0.15)
+  weightPoi         Float        @default(0.3)
+  weightCompetitor  Float        @default(0.15)
+  weightCompRatio   Float        @default(0.15)
+
+  @@map("business_type_masters")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum BusinessType {
+  CAFE
+  LAUNDRY
+  FNB
+  BARBERSHOP
+  SALON
+  GYM
+  BENGKEL
+  CARWASH
+  FASHION
+  ELEKTRONIK
+  PHOTOSTUDIO
+  STATIONERY
+}
+
+enum ClusterLabel {
+  RAMAI
+  POTENSIAL
+  SEPI
+}
+
+enum ConfidenceLevel {
+  TINGGI
+  SEDANG
+  RENDAH
 }

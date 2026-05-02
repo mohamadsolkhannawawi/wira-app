@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { fail } from "../utils/response.js";
 import { AppError } from "../utils/appError.js";
+import { env } from "../config/env.js";
 
 export const notFoundHandler = (_req: Request, res: Response): void => {
   res.status(404).json(fail("NOT_FOUND", "Route not found"));
@@ -22,7 +23,7 @@ export const errorHandler = (
   const message =
     err instanceof Error ? err.message : "Unexpected server error";
   const details =
-    process.env.NODE_ENV === "development" && err instanceof Error
+    env.nodeEnv === "development" && err instanceof Error
       ? { stack: err.stack }
       : undefined;
 

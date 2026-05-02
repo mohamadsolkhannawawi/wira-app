@@ -32,56 +32,101 @@ export interface AppInfoData {
   apiPrefix: string;
 }
 
-export interface LocationFeature {
-  kelurahan: string;
-  competitorCount: number;
-  competitionRatio: number;
+export type BusinessType = string;
+
+export type ClusterLabel = "RAMAI" | "POTENSIAL" | "SEPI";
+
+export type ConfidenceLevel = "TINGGI" | "SEDANG" | "RENDAH";
+
+export interface LocationMetrics {
+  trafficScore: number;
+  transitScore: number;
   poiScore: number;
-  residentialDensity: number;
-  transitCount: number;
+  competitorScore: number;
+  compRatio: number;
 }
 
-export interface AreaScore {
-  kelurahan: string;
-  clusterLabel: "ramai" | "potensial" | "sepi";
-  score: number;
-  confidence: "tinggi" | "sedang" | "rendah";
-}
-
-export interface InsightRequest {
-  businessType: "coffeeshop" | "laundry" | "other";
-  kelurahan: string;
-}
-
-export interface InsightResponse {
-  title: string;
-  summary: string;
-  recommendations: string[];
-}
-
-// Request dari Frontend ke Backend
 export interface AnalysisRequest {
-  locationId: string; // Contoh: "Kecamatan Semarang Tengah"
-  businessType: string; // Contoh: "cafe", "barbershop", "fashion"
+  businessType: BusinessType;
+  latitude: number;
+  longitude: number;
+  kelurahan?: string;
 }
 
-// Response dari Backend ke Frontend (Dummy dari AI)
+export interface AnalysisResult {
+  id: string;
+  locationName: string;
+  kecamatan: string;
+  businessType: BusinessType;
+  finalScore: number;
+  clusterLabel: ClusterLabel;
+  confidenceLevel: ConfidenceLevel;
+  metrics: LocationMetrics;
+  insight: string;
+  createdAt: string;
+}
+
 export interface AnalysisResponse {
-  success: boolean;
-  data: {
-    location: string;
-    businessType: string;
-    metrics: {
-      traffic_score: number;
-      transit_score: number;
-      poi_score: number;
-      competitor_count: number;
-      comp_ratio: number;
-    };
-    ai_prediction: {
-      final_score: number; // Skala 0 - 100
-      cluster: "Ramai" | "Potensial" | "Sepi";
-      insight: string; // Narasi buatan AI
-    };
-  };
+  success: true;
+  data: AnalysisResult;
+}
+
+export interface LocationSummary {
+  id: string;
+  kelurahan: string;
+  kecamatan: string;
+  latitude: number;
+  longitude: number;
+  finalScore: number;
+  clusterLabel: ClusterLabel;
+}
+
+export interface LocationDetail extends LocationSummary {
+  businessType: BusinessType;
+  confidenceLevel: ConfidenceLevel;
+  metrics: LocationMetrics;
+}
+
+export interface LocationsResponse {
+  locations: LocationSummary[];
+}
+
+export interface CompareLocationsResponse {
+  businessType: BusinessType;
+  locations: LocationDetail[];
+  recommended: string;
+  narrative: string;
+}
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  role: "USER" | "ADMIN";
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface AuthResponse {
+  user: AuthUser;
+  tokens: AuthTokens;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page?: number;
+}
+
+export interface SearchHistorySummary {
+  id: string;
+  locationName: string;
+  businessType: BusinessType;
+  finalScore: number;
+  clusterLabel: ClusterLabel;
+  isSaved: boolean;
+  createdAt: string;
 }
