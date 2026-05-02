@@ -6,12 +6,16 @@ import { getHistory, deleteHistory, toggleBookmark } from "../services/api/histo
 import type { SearchHistorySummary } from "@wira-app/shared";
 import { tokenManager } from "../utils/tokenManager";
 import { formatDistanceToNow } from "date-fns";
-import { id as localeId } from "date-fns/locale/id";
+import { id as localeId } from "date-fns/locale";
 
 export function HistoryPage() {
   const [historyItems, setHistoryItems] = useState<SearchHistorySummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filterType, setFilterType] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("latest");
+  const [showSavedOnly, setShowSavedOnly] = useState<boolean>(false);
+  
   const isAuthenticated = !!tokenManager.getAccessToken();
 
   useEffect(() => {
@@ -23,7 +27,13 @@ export function HistoryPage() {
       }
       try {
         setLoading(true);
-        const res = await getHistory();
+        const params = {
+          type: filterType || undefined,
+          sort: sortBy === "score" ? "score" : "date",
+          order: "desc",
+          saved: showSavedOnly || undefined
+        };
+        const res = await getHistory(1, 50, params.type, params.saved, params.sort, params.order);
         if (isMounted) setHistoryItems(res.data);
       } catch (err) {
         if (isMounted) setError(err instanceof Error ? err.message : "Gagal memuat riwayat");
@@ -33,7 +43,13 @@ export function HistoryPage() {
     };
     fetchHistory();
     return () => { isMounted = false; };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, filterType, sortBy, showSavedOnly]);
+
+  const handleResetFilters = () => {
+    setFilterType("");
+    setSortBy("latest");
+    setShowSavedOnly(false);
+  };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Hapus riwayat ini?")) return;
@@ -56,6 +72,21 @@ export function HistoryPage() {
     }
   };
 
+  const businessTypes = [
+    { value: "CAFE", label: "Cafe / Kopi" },
+    { value: "LAUNDRY", label: "Laundry" },
+    { value: "FNB", label: "Restoran / F&B" },
+    { value: "BARBERSHOP", label: "Barbershop" },
+    { value: "SALON", label: "Salon Kecantikan" },
+    { value: "GYM", label: "Gym" },
+    { value: "BENGKEL", label: "Bengkel" },
+    { value: "CARWASH", label: "Cuci Kendaraan" },
+    { value: "FASHION", label: "Fashion" },
+    { value: "ELEKTRONIK", label: "Elektronik" },
+    { value: "PHOTOSTUDIO", label: "Photo Studio" },
+    { value: "STATIONERY", label: "Stationery" },
+  ];
+
   return (
     <div className="min-h-screen bg-surface flex flex-col font-body">
       <SiteHeader />
@@ -65,22 +96,46 @@ export function HistoryPage() {
             <div>
               <h1 className="font-display font-bold text-3xl text-primary-900 mb-2">Riwayat Analisis</h1>
               <p className="font-body text-wiraText-secondary">
-                20 hasil analisis tersimpan
+                {historyItems.length} hasil analisis tersimpan
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <select className="px-4 py-2 bg-white border border-surface-3 rounded-none text-sm text-wiraText-secondary font-medium hover:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-500 cursor-pointer">
-                <option>Filter: Semua Usaha</option>
-                <option>Cafe / Kopi</option>
-                <option>Laundry</option>
+            <div className="flex flex-wrap items-center gap-3">
+              <select 
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="px-4 py-2 bg-white border border-surface-3 rounded-none text-sm text-wiraText-secondary font-medium hover:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-500 cursor-pointer"
+              >
+                <option value="">Semua Usaha</option>
+                {businessTypes.map(bt => (
+                  <option key={bt.value} value={bt.value}>{bt.label}</option>
+                ))}
               </select>
-              <select className="px-4 py-2 bg-white border border-surface-3 rounded-none text-sm text-wiraText-secondary font-medium hover:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-500 cursor-pointer">
-                <option>Urutkan: Terbaru</option>
-                <option>Skor Tertinggi</option>
+              <select 
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="px-4 py-2 bg-white border border-surface-3 rounded-none text-sm text-wiraText-secondary font-medium hover:border-primary-300 focus:outline-none focus:ring-1 focus:ring-primary-500 cursor-pointer"
+              >
+                <option value="latest">Terbaru</option>
+                <option value="score">Skor Tertinggi</option>
               </select>
-              <button className="px-4 py-2 bg-white border border-surface-3 rounded-none text-sm text-wiraText-secondary font-medium hover:bg-surface-2 transition-colors flex items-center gap-2">
-                <Star className="w-4 h-4" /> Bookmark
+              <button 
+                onClick={() => setShowSavedOnly(!showSavedOnly)}
+                className={`px-4 py-2 border rounded-none text-sm font-medium transition-colors flex items-center gap-2 ${
+                  showSavedOnly 
+                    ? "bg-amber-50 border-amber-200 text-amber-700" 
+                    : "bg-white border-surface-3 text-wiraText-secondary hover:bg-surface-2"
+                }`}
+              >
+                <Star className={`w-4 h-4 ${showSavedOnly ? "fill-amber-500" : ""}`} /> Bookmark
               </button>
+              {(filterType || sortBy !== "latest" || showSavedOnly) && (
+                <button 
+                  onClick={handleResetFilters}
+                  className="px-4 py-2 text-sm font-bold text-primary-700 hover:text-primary-900 transition-colors uppercase tracking-wider"
+                >
+                  Reset
+                </button>
+              )}
             </div>
           </div>
 
@@ -111,7 +166,7 @@ export function HistoryPage() {
                       </h3>
                       <p className="font-body text-sm text-wiraText-secondary font-medium">{item.businessType}</p>
                     </div>
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex gap-2 opacity-100 transition-opacity">
                       <button onClick={() => handleBookmark(item.id)} className={`w-8 h-8 flex items-center justify-center rounded-none transition-colors ${item.isSaved ? 'text-amber-500 bg-amber-50' : 'text-wiraText-muted hover:bg-surface-2 hover:text-amber-500'}`} title="Bookmark">
                         <Star className="w-4 h-4" />
                       </button>
@@ -138,7 +193,7 @@ export function HistoryPage() {
                   </div>
 
                   <div className="flex items-center justify-between border-t border-surface-3 pt-4 text-xs font-medium text-wiraText-muted">
-                    <span>{formatDistanceToNow(new Date(item.createdAt), { addSuffix: true, locale: localeId })}</span>
+                    <span>{item.createdAt ? formatDistanceToNow(new Date(item.createdAt), { addSuffix: true, locale: localeId }) : "Baru saja"}</span>
                     <a href={`/#analysis?id=${item.id}`} className="text-primary-600 hover:text-primary-800 flex items-center gap-1">
                       Lihat Detail <ArrowRight className="w-3 h-3 ml-1" />
                     </a>
