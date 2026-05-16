@@ -18,7 +18,7 @@ export const userRepository = {
     return prisma.user.update({ where: { id }, data });
   },
 
-  // ── Refresh Tokens ──
+  // Refresh Tokens
 
   async saveRefreshToken(userId: string, token: string, expiresAt: Date) {
     return prisma.refreshToken.create({ data: { userId, token, expiresAt } });

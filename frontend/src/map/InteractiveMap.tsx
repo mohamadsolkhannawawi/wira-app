@@ -34,7 +34,10 @@ export function InteractiveMap({ locations }: InteractiveMapProps) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {locations.map((location) => {
-          if (location.latitude === undefined || location.longitude === undefined) {
+          if (
+            location.latitude === undefined ||
+            location.longitude === undefined
+          ) {
             console.warn("Invalid location data found:", location);
             return null;
           }
@@ -57,7 +60,8 @@ export function InteractiveMap({ locations }: InteractiveMapProps) {
               </Tooltip>
             </CircleMarker>
           );
-        })}      </MapContainer>
+        })}{" "}
+      </MapContainer>
     </div>
   );
 }

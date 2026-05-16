@@ -30,7 +30,7 @@ export const optionalAuth = (
     try {
       req.user = tokenManager.verifyAccessToken(header.split(" ")[1]!);
     } catch {
-      /* guest mode — ignore invalid token */
+      /* guest mode - ignore invalid token */
     }
   }
   next();

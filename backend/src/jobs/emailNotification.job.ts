@@ -12,7 +12,7 @@ export const notificationJob = {
   }): Promise<void> {
     const channel = getChannel();
     if (!channel) {
-      logger.debug("RabbitMQ not available — skipping notification publish");
+      logger.debug("RabbitMQ not available - skipping notification publish");
       return;
     }
 

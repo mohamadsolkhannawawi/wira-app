@@ -5,7 +5,7 @@ let channel: amqp.Channel | null = null;
 
 export const connectRabbitMQ = async (): Promise<void> => {
   if (!env.rabbitmqUrl) {
-    console.warn("[RabbitMQ] No URL configured — message broker disabled");
+    console.warn("[RabbitMQ] No URL configured - message broker disabled");
     return;
   }
   try {

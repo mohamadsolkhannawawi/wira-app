@@ -2,12 +2,6 @@ import type { LocationData } from "@prisma/client";
 import { env } from "../config/env.js";
 import { logger } from "../utils/logger.utils.js";
 
-// ──────────────────────────────────────────────
-// AI Service — Strategy Pattern
-// Mock implementation now, swap to real API later
-// by changing only the function body of callRealAI
-// ──────────────────────────────────────────────
-
 interface AIInsightInput {
   businessType: string;
   kelurahan: string;
@@ -39,7 +33,7 @@ function buildInputFromLocation(
   };
 }
 
-// ── Mock AI: generates rich 2-3 paragraph insight ──
+// Mock AI: generates rich 2-3 paragraph insight
 
 function generateMockInsight(input: AIInsightInput): string {
   const { businessType, kelurahan, kecamatan, trafficScore, transitScore, poiScore, competitorCount, compRatio, clusterLabel, finalScore } = input;
@@ -133,7 +127,7 @@ function generateMockComparison(
   return narrative;
 }
 
-// ── Real AI API call (stub — swap body when API ready) ──
+// Real AI API call (stub - swap body when API ready)
 
 async function callRealAI(
   _prompt: string,
@@ -164,7 +158,7 @@ async function callRealAI(
   }
 }
 
-// ── Public API ──
+// Public API
 
 export const aiService = {
   async generateInsight(

@@ -18,7 +18,7 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const start = async () => {
-  // Connect optional services (graceful — won't crash if unavailable)
+  // Connect optional services
   await connectRabbitMQ();
   await notificationJob.startConsumer();
 

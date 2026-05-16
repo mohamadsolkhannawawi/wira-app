@@ -16,29 +16,29 @@ const parsePort = (value: string | undefined, fallback: number): number => {
 };
 
 export const env = {
-  // ── Server ──
+  // Server
   nodeEnv: process.env.NODE_ENV ?? "development",
   port: parsePort(process.env.PORT, 3000),
   appName: process.env.APP_NAME ?? "WIRA API",
   corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
 
-  // ── Database ──
+  // Database
   databaseUrl: requireEnv("DATABASE_URL"),
 
-  // ── JWT ──
+  // JWT 
   jwtSecret: requireEnv("JWT_SECRET", "wira-dev-jwt-secret-key-32chars!"),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
   jwtRefreshSecret: requireEnv("JWT_REFRESH_SECRET", "wira-dev-refresh-secret-32chars!"),
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? "30d",
   jwtRefreshExpiresInDays: parseInt(process.env.JWT_REFRESH_EXPIRES_IN_DAYS ?? "30", 10),
 
-  // ── Redis (optional) ──
+  // Redis
   redisUrl: process.env.REDIS_URL ?? "",
 
-  // ── RabbitMQ (optional) ──
+  // RabbitMQ
   rabbitmqUrl: process.env.RABBITMQ_URL ?? "",
 
-  // ── AI Service ──
+  // AI Service
   aiServiceUrl: process.env.AI_SERVICE_URL ?? "",
   aiApiKey: process.env.AI_API_KEY ?? "",
 } as const;
