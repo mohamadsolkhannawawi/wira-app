@@ -4,6 +4,7 @@ import { env } from "./env.js";
 type RedisClient = IORedis.Redis;
 
 let redis: RedisClient | null = null;
+let redisErrorLogged = false;
 
 export const getRedis = (): RedisClient | null => {
   if (redis) return redis;
@@ -11,20 +12,27 @@ export const getRedis = (): RedisClient | null => {
 
   try {
     const client = new IORedis.default(env.redisUrl, {
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: 1,
       retryStrategy(times: number) {
-        if (times > 5) return null;
-        return Math.min(times * 200, 2000);
+        if (times > 2) return null;  // give up after 2 retries
+        return Math.min(times * 500, 2000);
       },
       lazyConnect: true,
     });
 
-    client.on("error", (err: Error) => {
-      console.warn("[Redis] Connection error:", err.message);
+    client.on("error", () => {
+      if (!redisErrorLogged) {
+        console.warn("[Redis] Connection failed — caching disabled (suppressing further errors)");
+        redisErrorLogged = true;
+      }
+      redis = null;
     });
 
     client.connect().catch(() => {
-      console.warn("[Redis] Could not connect — caching disabled");
+      if (!redisErrorLogged) {
+        console.warn("[Redis] Could not connect — caching disabled");
+        redisErrorLogged = true;
+      }
       redis = null;
     });
 

@@ -25,12 +25,18 @@ export const env = {
   // Database
   databaseUrl: requireEnv("DATABASE_URL"),
 
-  // JWT 
+  // JWT
   jwtSecret: requireEnv("JWT_SECRET", "wira-dev-jwt-secret-key-32chars!"),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
-  jwtRefreshSecret: requireEnv("JWT_REFRESH_SECRET", "wira-dev-refresh-secret-32chars!"),
+  jwtRefreshSecret: requireEnv(
+    "JWT_REFRESH_SECRET",
+    "wira-dev-refresh-secret-32chars!",
+  ),
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? "30d",
-  jwtRefreshExpiresInDays: parseInt(process.env.JWT_REFRESH_EXPIRES_IN_DAYS ?? "30", 10),
+  jwtRefreshExpiresInDays: parseInt(
+    process.env.JWT_REFRESH_EXPIRES_IN_DAYS ?? "30",
+    10,
+  ),
 
   // Redis
   redisUrl: process.env.REDIS_URL ?? "",
@@ -39,6 +45,14 @@ export const env = {
   rabbitmqUrl: process.env.RABBITMQ_URL ?? "",
 
   // AI Service
-  aiServiceUrl: process.env.AI_SERVICE_URL ?? "",
-  aiApiKey: process.env.AI_API_KEY ?? "",
+  aiRecommendUrl: process.env.AI_RECOMMEND_URL ?? "",
+
+  // Gemini & Backup
+  geminiApiKey: process.env.GEMINI_API_KEY ?? "",
+  geminiBackupApiKey: process.env.GEMINI_BACKUP_API_KEY ?? "",
+  groqApiKey: process.env.GROQ_API_KEY ?? "",
+  geminiModel: process.env.GEMINI_MODEL ?? "gemini-1.5-flash",
+  geminiApiUrl:
+    process.env.GEMINI_API_URL ??
+    "https://generativelanguage.googleapis.com/v1beta/models",
 } as const;

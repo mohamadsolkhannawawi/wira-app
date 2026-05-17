@@ -18,18 +18,18 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const start = async () => {
-  // Connect optional services
-  await connectRabbitMQ();
-  await notificationJob.startConsumer();
+    // Connect optional services
+    await connectRabbitMQ();
+    await notificationJob.startConsumer();
 
-  app.listen(env.port, () => {
-    logger.info(`${env.appName} is running on port ${env.port}`);
-    logger.info(`API prefix: ${API_PREFIX}`);
-    logger.info(`Environment: ${env.nodeEnv}`);
-  });
+    app.listen(env.port, () => {
+        logger.info(`${env.appName} is running on port ${env.port}`);
+        logger.info(`API prefix: ${API_PREFIX}`);
+        logger.info(`Environment: ${env.nodeEnv}`);
+    });
 };
 
 start().catch((err) => {
-  logger.error("Failed to start server", err);
-  process.exit(1);
+    logger.error("Failed to start server", err);
+    process.exit(1);
 });
