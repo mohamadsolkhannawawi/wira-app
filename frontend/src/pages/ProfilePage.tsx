@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { SiteHeader } from "../components/layout/SiteHeader";
 import { SiteFooter } from "../components/layout/SiteFooter";
-import { User, Mail, Shield, CheckCircle } from "lucide-react";
+import { User, Mail, AtSign, CheckCircle } from "lucide-react";
 import { getProfile } from "../services/api/user";
 import type { AuthUser } from "@wira-app/shared";
 import { tokenManager } from "../utils/tokenManager";
@@ -56,7 +56,7 @@ export function ProfilePage() {
                     <User className="w-12 h-12" />
                   </div>
                   <h2 className="font-display font-bold text-xl text-primary-900">{user.name}</h2>
-                  <p className="text-sm text-wiraText-muted mb-6">{user.role}</p>
+                  <p className="text-sm text-primary-700 font-mono mb-6">@{user.username || "wirauser"}</p>
                   
                   <div className="w-full pt-6 border-t border-surface-3 flex flex-col gap-2">
                     <div className="flex items-center justify-between text-sm">
@@ -73,10 +73,20 @@ export function ProfilePage() {
               <div className="md:col-span-2 flex flex-col gap-6">
                 <div className="bg-white border border-surface-3 rounded-none p-8 shadow-sm">
                   <h3 className="font-display font-bold text-lg text-primary-900 mb-6 border-b border-surface-3 pb-4">
-                    Informasi Akun
+                    Informasi Pengguna
                   </h3>
                   
                   <div className="flex flex-col gap-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 bg-surface-2 rounded-none">
+                        <AtSign className="w-5 h-5 text-primary-600" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-wiraText-muted uppercase tracking-wider mb-1">Username</span>
+                        <span className="text-primary-900 font-mono font-medium">@{user.username || "wirauser"}</span>
+                      </div>
+                    </div>
+
                     <div className="flex items-start gap-4">
                       <div className="p-2 bg-surface-2 rounded-none">
                         <User className="w-5 h-5 text-primary-600" />
@@ -94,16 +104,6 @@ export function ProfilePage() {
                       <div className="flex flex-col">
                         <span className="text-xs font-bold text-wiraText-muted uppercase tracking-wider mb-1">Alamat Email</span>
                         <span className="text-primary-900 font-medium">{user.email}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-4">
-                      <div className="p-2 bg-surface-2 rounded-none">
-                        <Shield className="w-5 h-5 text-primary-600" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-wiraText-muted uppercase tracking-wider mb-1">Peran Akses</span>
-                        <span className="text-primary-900 font-medium">{user.role}</span>
                       </div>
                     </div>
                   </div>

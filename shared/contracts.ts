@@ -90,6 +90,7 @@ export interface StreetOption {
 
 export interface AuthUser {
   id: string;
+  username?: string;
   name: string;
   email: string;
   role: "USER" | "ADMIN";

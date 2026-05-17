@@ -45,7 +45,7 @@ export const authService = {
     await userRepository.saveRefreshToken(user.id, refreshToken, createRefreshTokenExpiry());
 
     return {
-      user: { id: user.id, name: user.name ?? "", email: user.email, role: user.role },
+      user: { id: user.id, username: user.username, name: user.name ?? "", email: user.email, role: user.role },
       tokens: { accessToken, refreshToken },
     };
   },
@@ -63,7 +63,7 @@ export const authService = {
     await userRepository.saveRefreshToken(user.id, refreshToken, createRefreshTokenExpiry());
 
     return {
-      user: { id: user.id, name: user.name ?? "", email: user.email, role: user.role },
+      user: { id: user.id, username: user.username, name: user.name ?? "", email: user.email, role: user.role },
       tokens: { accessToken, refreshToken },
     };
   },
@@ -87,7 +87,7 @@ export const authService = {
     await userRepository.saveRefreshToken(user.id, newRefreshToken, createRefreshTokenExpiry());
 
     return {
-      user: { id: user.id, name: user.name ?? "", email: user.email, role: user.role },
+      user: { id: user.id, username: user.username, name: user.name ?? "", email: user.email, role: user.role },
       tokens: { accessToken: newAccessToken, refreshToken: newRefreshToken },
     };
   },
