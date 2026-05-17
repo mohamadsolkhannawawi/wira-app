@@ -1,41 +1,54 @@
 import { Router } from "express";
 import {
-    getLocations,
-    getByKelurahan,
-    compare,
-    explore,
-    getSuggestions,
+  getKecamatanList,
+  getKelurahanList,
+  getStreetList,
+  searchStreets,
 } from "../controllers/locationsController.js";
 import { validate } from "../middleware/validation.middleware.js";
 import {
-    getLocationsSchema,
-    compareLocationsSchema,
-    exploreLocationsSchema,
+  kecamatanListSchema,
+  kelurahanListSchema,
+  streetListSchema,
+  streetSearchSchema,
 } from "../validators/location.validator.js";
 
 const locationsRouter = Router();
 
-// NEW: Get unique kelurahan names for suggestions
-locationsRouter.get("/suggestions", getSuggestions);
-
-// Pasca-MVP: Explore top locations
+/**
+ * GET /api/v1/locations/kecamatan
+ * Response: { success: true, data: ["Tembalang", "Banyumanik", ...] }
+ * Kegunaan: isi dropdown Kecamatan (filter opsional)
+ */
 locationsRouter.get(
-    "/explore",
-    validate(exploreLocationsSchema),
-    explore,
+  "/kecamatan",
+  validate(kecamatanListSchema),
+  getKecamatanList,
 );
 
-// Pasca-MVP: Compare 2-3 locations side-by-side
+/**
+ * GET /api/v1/locations/kelurahan
+ * Response: { success: true, data: ["Bulusan", "Tembalang", ...] }
+ * Kegunaan: isi dropdown Kelurahan di frontend
+ */
 locationsRouter.get(
-    "/compare",
-    validate(compareLocationsSchema),
-    compare,
+  "/kelurahan",
+  validate(kelurahanListSchema),
+  getKelurahanList,
 );
 
-// MVP: Get all locations with filters
-locationsRouter.get("/", validate(getLocationsSchema), getLocations);
+/**
+ * GET /api/v1/locations/streets?kelurahan=Tembalang
+ * Response: { success: true, data: [{ namaJalan, latCentroid, lngCentroid }, ...] }
+ * Kegunaan: isi dropdown Nama Jalan setelah kelurahan dipilih
+ */
+locationsRouter.get("/streets", validate(streetListSchema), getStreetList);
 
-// MVP: Get by kelurahan name (MUST BE LAST to avoid shadowing static routes)
-locationsRouter.get("/:kelurahan", getByKelurahan);
+/**
+ * GET /api/v1/locations/search?q=Gondang
+ * Response: { success: true, data: [{ namaJalan, kelurahan, kecamatan, ... }, ...] }
+ * Kegunaan: autocomplete pencarian jalan
+ */
+locationsRouter.get("/search", validate(streetSearchSchema), searchStreets);
 
 export { locationsRouter };

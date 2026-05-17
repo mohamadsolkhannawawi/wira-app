@@ -2,75 +2,58 @@ import type { Request, Response, NextFunction } from "express";
 import { locationService } from "../services/locations.service.js";
 import { ok } from "../utils/response.js";
 
-export const getLocations = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
-    const result = await locationService.getAll(req.query as Record<string, string>);
-    res.status(200).json(ok(result));
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const getByKelurahan = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
-    const kelurahan = req.params.kelurahan as string;
-    const businessType = req.query.type as string | undefined;
-    const data = await locationService.getByKelurahan(kelurahan, businessType);
-    res.status(200).json(ok(data));
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const compare = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
-    const rawKelurahan = req.query.kelurahan;
-    const kelurahanArray: string[] = Array.isArray(rawKelurahan)
-      ? rawKelurahan.map(String)
-      : [String(rawKelurahan)];
-    const businessType = String(req.query.type);
-    const data = await locationService.compare(kelurahanArray, businessType);
-    res.status(200).json(ok(data));
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const explore = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> => {
-  try {
-    const limit = parseInt(String(req.query.limit ?? "10"), 10);
-    const businessType = String(req.query.type);
-    const data = await locationService.explore(businessType, limit);
-    res.status(200).json(ok(data));
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const getSuggestions = async (
+export const getKecamatanList = async (
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
   try {
     const query = req.query.q as string | undefined;
-    const data = await locationService.getSuggestions(query);
+    const data = await locationService.getKecamatanList(query);
+    res.status(200).json(ok(data));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getKelurahanList = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const query = req.query.q as string | undefined;
+    const data = await locationService.getKelurahanList(query);
+    res.status(200).json(ok(data));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getStreetList = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const kelurahan = String(req.query.kelurahan ?? "");
+    const query = req.query.q as string | undefined;
+    const data = await locationService.getStreetList(kelurahan, query);
+    res.status(200).json(ok(data));
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const searchStreets = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const query = String(req.query.q ?? "");
+    const limit = req.query.limit ? Number(req.query.limit) : undefined;
+    const data = await locationService.searchStreets(query, limit);
     res.status(200).json(ok(data));
   } catch (err) {
     next(err);

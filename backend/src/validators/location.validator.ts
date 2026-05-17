@@ -1,28 +1,35 @@
 import { z } from "zod";
-import { BusinessTypeEnum } from "./analysis.validator.js";
 
-export const getLocationsSchema = z.object({
-  query: z.object({
-    type: BusinessTypeEnum.optional(),
-    kecamatan: z.string().optional(),
-    cluster: z.enum(["RAMAI", "POTENSIAL", "SEPI"]).optional(),
-    sort: z.enum(["score", "name"]).optional(),
-    order: z.enum(["asc", "desc"]).optional(),
-    page: z.string().optional(),
-    limit: z.string().optional(),
-  }).passthrough(),
+export const kecamatanListSchema = z.object({
+  query: z
+    .object({
+      q: z.string().optional(),
+    })
+    .passthrough(),
 });
 
-export const compareLocationsSchema = z.object({
-  query: z.object({
-    kelurahan: z.union([z.string(), z.array(z.string())]),
-    type: BusinessTypeEnum,
-  }).passthrough(),
+export const kelurahanListSchema = z.object({
+  query: z
+    .object({
+      q: z.string().optional(),
+    })
+    .passthrough(),
 });
 
-export const exploreLocationsSchema = z.object({
-  query: z.object({
-    type: BusinessTypeEnum,
-    limit: z.string().optional(),
-  }).passthrough(),
+export const streetListSchema = z.object({
+  query: z
+    .object({
+      kelurahan: z.string().min(1, "Kelurahan wajib diisi"),
+      q: z.string().optional(),
+    })
+    .passthrough(),
+});
+
+export const streetSearchSchema = z.object({
+  query: z
+    .object({
+      q: z.string().min(2, "Minimal 2 karakter"),
+      limit: z.string().optional(),
+    })
+    .passthrough(),
 });
