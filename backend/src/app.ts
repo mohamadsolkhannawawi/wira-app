@@ -18,9 +18,13 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const start = async () => {
-    // Connect optional services
-    await connectRabbitMQ();
-    await notificationJob.startConsumer();
+    // Connect optional services in standalone mode
+    try {
+        await connectRabbitMQ();
+        await notificationJob.startConsumer();
+    } catch (err) {
+        logger.warn("Optional service connection skipped in serverless mode", err);
+    }
 
     app.listen(env.port, () => {
         logger.info(`${env.appName} is running on port ${env.port}`);
@@ -29,7 +33,12 @@ const start = async () => {
     });
 };
 
-start().catch((err) => {
-    logger.error("Failed to start server", err);
-    process.exit(1);
-});
+// Only run standalone server if not in Vercel Serverless environment
+if (!process.env.VERCEL) {
+    start().catch((err) => {
+        logger.error("Failed to start server", err);
+        process.exit(1);
+    });
+}
+
+export default app;
