@@ -88,7 +88,6 @@ async function main() {
   console.log(`   ✅ ${validRows.length} rows valid`);
   console.log(`   ⚠️  ${rows.length - validRows.length} rows skipped\n`);
 
-  await prisma.streetLocation.deleteMany();
   const result = await prisma.streetLocation.createMany({
     data: validRows,
     skipDuplicates: true,
