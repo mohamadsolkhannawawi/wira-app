@@ -10,14 +10,14 @@ datasource db {
 model User {
   id         String          @id @default(uuid())
   email      String          @unique
+  username   String          @unique
   password   String
   name       String?
   role       UserRole        @default(USER)
-  isVerified Boolean         @default(false)
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
 
-  searches   SearchHistory[]
+  analyses   AnalysisHistory[]
   tokens     RefreshToken[]
 
   @@map("users")
@@ -35,72 +35,59 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
-model SearchHistory {
-  id              String          @id @default(uuid())
-  userId          String?
-  businessType    BusinessType
-  resultScore     Float
-  clusterLabel    ClusterLabel
-  insight         String          @db.Text
-  confidenceLevel ConfidenceLevel
-  isSaved         Boolean         @default(false)
+model StreetLocation {
+  id          String   @id @default(uuid())
+  namaJalan   String
+  kelurahan   String
+  kecamatan   String
+  latCentroid Float
+  lngCentroid Float
 
-  locationName    String
-  kecamatan       String
-  latitude        Float
-  longitude       Float
+  analyses    AnalysisHistory[]
 
-  trafficScore    Float
-  transitScore    Float
-  poiScore        Float
-  competitorScore Float
-  compRatio       Float
-
-  createdAt       DateTime        @default(now())
-
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
-
-  @@map("search_histories")
+  @@unique([namaJalan, kelurahan])
+  @@index([kelurahan])
+  @@index([kecamatan])
+  @@map("street_locations")
 }
 
-model LocationData {
-  id              String       @id @default(uuid())
-  namaJalan        String
-  kecamatan       String
-  kelurahan       String
-  latCentroid     Float
-  lngCentroid     Float
-  businessType    BusinessType
-
-  trafficScore    Float
-  transitScore    Float
-  poiScore        Float
-  competitorCount Float
-  compRatio       Float
-
-  clusterLabel    ClusterLabel
-  finalScore      Float
-
-  dataVersion     String       @default("v1.0")
-  lastUpdated     DateTime     @default(now())
-
-  @@unique([kelurahan, businessType])
-  @@map("location_data")
-}
-
-model BusinessTypeMaster {
+model AnalysisHistory {
   id                String       @id @default(uuid())
-  code              BusinessType @unique
-  label             String
-  description       String?
-  isActive          Boolean      @default(true)
-  weightTraffic     Float        @default(0.25)
-  weightTransit     Float        @default(0.15)
-  weightPoi         Float        @default(0.3)
-  weightCompetitor  Float        @default(0.15)
-  weightCompRatio   Float        @default(0.15)
+  streetName        String
+  kelurahan         String
+  kecamatan         String
+  bizType           BusinessType
 
-  @@map("business_type_masters")
+  skorPotensi       Float
+  trafficScore      Float
+  transitScore      Float
+  poiScore          Float
+  competitor        Float
+  compRatio         Float
+
+  bobotTraffic      Float
+  bobotTransit      Float
+  bobotPoi          Float
+  bobotCompetitor   Float
+  bobotCompRatio    Float
+
+  rekomendasiAlternatif Json?
+  aiInsight         String?      @db.Text
+
+  userId            String?
+  isSaved           Boolean      @default(false)
+
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  user   User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  street StreetLocation? @relation(fields: [streetName, kelurahan], references: [namaJalan, kelurahan])
+
+  @@index([userId])
+  @@index([bizType])
+  @@index([kelurahan])
+  @@index([createdAt])
+  @@map("analysis_histories")
 }
 
 enum UserRole {
@@ -121,16 +108,4 @@ enum BusinessType {
   ELEKTRONIK
   PHOTOSTUDIO
   STATIONERY
-}
-
-enum ClusterLabel {
-  RAMAI
-  POTENSIAL
-  SEPI
-}
-
-enum ConfidenceLevel {
-  TINGGI
-  SEDANG
-  RENDAH
 }
