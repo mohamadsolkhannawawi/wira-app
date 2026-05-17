@@ -33,3 +33,12 @@ export const streetSearchSchema = z.object({
     })
     .passthrough(),
 });
+
+export const nearestLocationSchema = z.object({
+  query: z
+    .object({
+      lat: z.string().min(1, "Latitude wajib diisi"),
+      lng: z.string().min(1, "Longitude wajib diisi"),
+    })
+    .passthrough(),
+});

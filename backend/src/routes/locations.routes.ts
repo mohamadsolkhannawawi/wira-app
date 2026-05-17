@@ -4,6 +4,7 @@ import {
   getKelurahanList,
   getStreetList,
   searchStreets,
+  findNearestLocation,
 } from "../controllers/locationsController.js";
 import { validate } from "../middleware/validation.middleware.js";
 import {
@@ -11,6 +12,7 @@ import {
   kelurahanListSchema,
   streetListSchema,
   streetSearchSchema,
+  nearestLocationSchema,
 } from "../validators/location.validator.js";
 
 const locationsRouter = Router();
@@ -50,5 +52,12 @@ locationsRouter.get("/streets", validate(streetListSchema), getStreetList);
  * Kegunaan: autocomplete pencarian jalan
  */
 locationsRouter.get("/search", validate(streetSearchSchema), searchStreets);
+
+/**
+ * GET /api/v1/locations/nearest?lat=-7.0&lng=110.4
+ * Response: { success: true, data: { nearest: { kelurahan, ... }, distanceKm: 5 } }
+ * Kegunaan: Fitur "Gunakan Lokasi Saat Ini"
+ */
+locationsRouter.get("/nearest", validate(nearestLocationSchema), findNearestLocation);
 
 export { locationsRouter };

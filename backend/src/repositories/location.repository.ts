@@ -64,4 +64,37 @@ export const locationRepository = {
       take: limit,
     });
   },
+
+  async findNearestLocation(userLat: number, userLng: number) {
+    const locations = await prisma.streetLocation.findMany({
+      distinct: ["kelurahan"],
+      select: { kelurahan: true, kecamatan: true, latCentroid: true, lngCentroid: true },
+    });
+
+    let nearest = null;
+    let minDistance = Infinity;
+
+    const toRad = (x: number) => (x * Math.PI) / 180;
+    
+    for (const loc of locations) {
+      const R = 6371; // km
+      const dLat = toRad(loc.latCentroid - userLat);
+      const dLng = toRad(loc.lngCentroid - userLng);
+      
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(userLat)) * Math.cos(toRad(loc.latCentroid)) *
+        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+        
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c;
+
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearest = loc;
+      }
+    }
+
+    return { nearest, distanceKm: minDistance };
+  },
 };

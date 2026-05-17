@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AnalysisRequest } from "@wira-app/shared";
 import { Loader2, ArrowRight, MapPin, AlertTriangle, X } from "lucide-react";
-import { getKelurahanList, getStreetList } from "../services/api/locations";
+import { getKelurahanList, getStreetList, findNearestLocation } from "../services/api/locations";
 
 interface SearchCardProps {
   onSubmit: (payload: AnalysisRequest) => void;
@@ -123,22 +123,35 @@ export function SearchCard({ onSubmit, isLoading }: SearchCardProps) {
     setIsLocating(true);
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          void position;
-          // Simulasi reverse geocoding: jika koordinat dekat Tembalang, pilih Tembalang
-          setKelurahan("Tembalang");
-          setIsLocating(false);
+        async (position) => {
+          try {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            const data = await findNearestLocation(lat, lng);
+            
+            // If nearest location is more than 15km away, they are likely outside Semarang
+            if (!data.nearest || data.distanceKm > 15) {
+              setValidationError("Lokasi Anda saat ini terdeteksi berada di luar area layanan aplikasi (di luar radius Semarang). Silakan pilih kelurahan dan nama jalan secara manual dari menu dropdown.");
+            } else {
+              setKelurahan(data.nearest.kelurahan);
+            }
+          } catch (err) {
+            console.error("Geocoding error", err);
+            setValidationError("Gagal memproses koordinat lokasi Anda. Silakan coba lagi atau pilih manual.");
+          } finally {
+            setIsLocating(false);
+          }
         },
         (error) => {
           console.error("Error getting location", error);
-          alert(
-            "Gagal mendeteksi lokasi. Pastikan izin lokasi diberikan pada peramban Anda.",
-          );
+          setValidationError("Gagal mendeteksi lokasi. Pastikan izin lokasi (GPS) diberikan pada peramban Anda.");
           setIsLocating(false);
         },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
-      alert("Geolocation tidak didukung di peramban ini.");
+      setValidationError("Geolocation tidak didukung di peramban ini.");
       setIsLocating(false);
     }
   };

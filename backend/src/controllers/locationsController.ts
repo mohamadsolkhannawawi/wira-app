@@ -59,3 +59,18 @@ export const searchStreets = async (
     next(err);
   }
 };
+
+export const findNearestLocation = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const lat = Number(req.query.lat);
+    const lng = Number(req.query.lng);
+    const data = await locationService.findNearestLocation(lat, lng);
+    res.status(200).json(ok(data));
+  } catch (err) {
+    next(err);
+  }
+};

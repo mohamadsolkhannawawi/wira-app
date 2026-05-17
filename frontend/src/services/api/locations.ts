@@ -32,6 +32,19 @@ export const searchStreets = async (
   >(`/locations/search?${params.toString()}`);
 };
 
+export const findNearestLocation = async (
+  lat: number,
+  lng: number,
+): Promise<{
+  nearest: { kelurahan: string; kecamatan: string; latCentroid: number; lngCentroid: number };
+  distanceKm: number;
+}> => {
+  const params = new URLSearchParams();
+  params.set("lat", lat.toString());
+  params.set("lng", lng.toString());
+  return requestJson(`/locations/nearest?${params.toString()}`);
+};
+
 /**
  * Alias for getKelurahanList — used by ComparePage for the search modal.
  */

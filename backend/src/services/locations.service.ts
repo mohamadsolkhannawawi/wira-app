@@ -22,4 +22,11 @@ export const locationService = {
     if (!query || query.length < 2) return [];
     return locationRepository.searchStreets(query, limit);
   },
+
+  async findNearestLocation(lat: number, lng: number) {
+    if (isNaN(lat) || isNaN(lng)) {
+      throw new AppError("Koordinat tidak valid", 400, "INVALID_COORDINATES");
+    }
+    return locationRepository.findNearestLocation(lat, lng);
+  },
 };
