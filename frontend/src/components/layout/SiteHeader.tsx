@@ -113,13 +113,6 @@ export function SiteHeader() {
             >
               Analisis
             </a>
-            <a
-              href="/#map"
-              className="px-4 py-3 font-body text-base font-medium text-wiraText-secondary hover:bg-[rgba(10,79,61,0.06)] rounded-none transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Peta Heatmap
-            </a>
             {isAuthenticated && (
               <a
                 href="/history"
