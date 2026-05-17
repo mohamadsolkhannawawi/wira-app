@@ -339,9 +339,9 @@ export function SearchCard({ onSubmit, isLoading }: SearchCardProps) {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 mt-2">
+      <div className="flex flex-col sm:flex-row gap-3.5 mt-6 pt-4 border-t border-surface-2">
         <button
-          className="flex-1 bg-primary-800 text-white! font-body font-medium h-13 rounded-none hover:bg-primary-700 hover:-translate-y-px hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none"
+          className="group w-full sm:flex-1 bg-primary-800 text-white! font-display font-bold text-base min-h-[56px] px-8 rounded-none shadow-[0_4px_12px_rgba(13,26,20,0.15)] hover:bg-primary-700 hover:-translate-y-0.5 hover:shadow-[0_6px_16px_rgba(13,26,20,0.2)] active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2.5 tracking-wide disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none uppercase cursor-pointer"
           type="submit"
           disabled={isLoading}
         >
@@ -352,12 +352,12 @@ export function SearchCard({ onSubmit, isLoading }: SearchCardProps) {
             </>
           ) : (
             <>
-              Analisis Sekarang <ArrowRight className="w-4 h-4 ml-1" />
+              Analisis Sekarang <ArrowRight className="w-5 h-5 ml-1 transition-transform group-hover:translate-x-1" />
             </>
           )}
         </button>
         <button
-          className="px-6 py-3 bg-white text-wiraText-secondary border border-surface-3 font-body font-medium rounded-none hover:bg-surface-2 transition-colors h-13"
+          className="w-full sm:w-auto px-8 py-3 min-h-[56px] bg-white text-wiraText-secondary border border-surface-3 font-display font-bold text-sm tracking-wide rounded-none hover:bg-surface-2 hover:text-wiraText-primary transition-all duration-200 uppercase flex items-center justify-center cursor-pointer"
           type="button"
           onClick={handleReset}
           disabled={isLoading}
