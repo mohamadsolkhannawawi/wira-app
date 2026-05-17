@@ -10,3 +10,9 @@ export const submitAnalysis = async (
     body: JSON.stringify(payload),
   });
 };
+
+export const getAnalysisById = async (
+  id: string,
+): Promise<AnalysisResult> => {
+  return requestJson<AnalysisResult>(`/analysis/${id}`);
+};

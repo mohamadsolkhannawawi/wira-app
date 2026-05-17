@@ -8,7 +8,9 @@ export function SiteHeader() {
 
   useEffect(() => {
     // Check authentication on mount and whenever tokens change
-    setIsAuthenticated(!!tokenManager.getAccessToken());
+    setTimeout(() => {
+      setIsAuthenticated(!!tokenManager.getAccessToken());
+    }, 0);
   }, []);
 
   const handleLogout = () => {
@@ -38,12 +40,6 @@ export function SiteHeader() {
             className="px-4 py-2 font-body text-sm font-medium text-wiraText-secondary hover:bg-[rgba(10,79,61,0.06)] rounded-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
             Analisis
-          </a>
-          <a
-            href="/#map"
-            className="px-4 py-2 font-body text-sm font-medium text-wiraText-secondary hover:bg-[rgba(10,79,61,0.06)] rounded-none transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            Peta Heatmap
           </a>
         </nav>
 
