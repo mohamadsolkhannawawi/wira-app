@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import type { AnalysisRequest } from "@wira-app/shared";
 import { analysisService } from "../services/analysis.service.js";
+import { aiService } from "../services/ai.service.js";
 import { ok } from "../utils/response.js";
 
 export const submitAnalysis = async (
@@ -79,3 +80,35 @@ export const deleteAnalysis = async (
     next(err);
   }
 };
+
+export const compareInsight = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const { businessType, locations } = req.body as {
+      businessType: string;
+      locations: Array<{
+        namaJalan: string;
+        kelurahan: string;
+        finalScore: number;
+        trafficScore: number;
+        transitScore: number;
+        poiScore: number;
+        competitorCount: number;
+        compRatio: number;
+      }>;
+    };
+
+    const narrative = await aiService.generateComparisonNarrative(
+      businessType,
+      locations,
+    );
+
+    res.status(200).json(ok({ narrative }));
+  } catch (err) {
+    next(err);
+  }
+};
+

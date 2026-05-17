@@ -5,6 +5,7 @@ import {
   getHistory,
   toggleBookmark,
   deleteAnalysis,
+  compareInsight,
 } from "../controllers/analysisController.js";
 import { validate } from "../middleware/validation.middleware.js";
 import { createAnalysisSchema, getHistorySchema, analysisIdSchema } from "../validators/analysis.validator.js";
@@ -14,6 +15,9 @@ const analysisRouter = Router();
 
 // MVP: Submit analysis (guest or authenticated)
 analysisRouter.post("/analysis", optionalAuth, validate(createAnalysisSchema), submitAnalysis);
+
+// Compare insight (authenticated only)
+analysisRouter.post("/analysis/compare-insight", authenticate, compareInsight);
 
 // Pasca-MVP: History (authenticated only)
 analysisRouter.get("/analysis/history", authenticate, validate(getHistorySchema), getHistory);
@@ -28,3 +32,4 @@ analysisRouter.patch("/analysis/:id/bookmark", authenticate, validate(analysisId
 analysisRouter.delete("/analysis/:id", authenticate, validate(analysisIdSchema), deleteAnalysis);
 
 export { analysisRouter };
+

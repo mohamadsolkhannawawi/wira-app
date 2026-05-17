@@ -1,9 +1,8 @@
 import type { AnalysisRequest, AnalysisResult } from "@wira-app/shared";
-import { locationRepository } from "../repositories/location.repository.js";
 import { analysisRepository } from "../repositories/analysis.repository.js";
+import prisma from "../config/database.js";
 import { cacheService, TTL } from "./cache.service.js";
 import { aiService } from "./ai.service.js";
-import { scoringService } from "./scoring.service.js";
 import { AppError } from "../utils/appError.js";
 
 export const analysisService = {
@@ -11,59 +10,61 @@ export const analysisService = {
     payload: AnalysisRequest,
     userId?: string,
   ): Promise<AnalysisResult> {
-    const kelurahan = payload.kelurahan ?? "";
-    const cacheKey = `analysis:${payload.businessType}:${kelurahan.toLowerCase()}`;
+    const streetName = payload.streetName?.trim() ?? "";
+    if (!streetName) {
+      throw new AppError(
+        "Nama jalan/lokasi wajib diisi",
+        400,
+        "STREET_NAME_REQUIRED",
+      );
+    }
+
+    const kelurahan = payload.kelurahan?.trim() ?? "";
+    if (!kelurahan) {
+      throw new AppError("Kelurahan wajib diisi", 400, "KELURAHAN_REQUIRED");
+    }
+
+    const bizType = payload.bizType?.trim() ?? "";
+    if (!bizType) {
+      throw new AppError("Jenis usaha wajib diisi", 400, "BIZTYPE_REQUIRED");
+    }
+
+    const cacheKey = `analysis:${bizType}:${kelurahan.toLowerCase()}:${streetName.toLowerCase()}`;
 
     // 1. Check cache
     const cached = await cacheService.get<AnalysisResult>(cacheKey);
     if (cached) {
       // Still save to user history even on cache hit
       if (userId) {
-        this._saveToHistory(cached, payload, userId).catch(() => {});
+        this._saveToHistory(cached, userId).catch(() => {});
       }
       return cached;
     }
 
-    // 2. Query DB
-    const locationData = await locationRepository.findByKelurahanAndType(
-      kelurahan,
-      payload.businessType,
+    // 2. Call AI model
+    const recommendation = await aiService.getRecommendation(
+      streetName,
+      bizType,
     );
 
-    if (!locationData) {
-      throw new AppError(
-        `Data lokasi tidak ditemukan untuk kelurahan "${kelurahan}" dengan jenis usaha "${payload.businessType}"`,
-        404,
-        "LOCATION_NOT_FOUND",
-      );
-    }
+    const insight =
+      await aiService.generateInsightFromRecommendation(recommendation);
 
-    // 3. Calculate score & confidence
-    const finalScore = await scoringService.calculateWeightedScore(locationData);
-    const confidenceLevel = scoringService.determineConfidence(locationData);
+    const street = await prisma.streetLocation.findFirst({
+      where: { namaJalan: streetName, kelurahan },
+      select: { kecamatan: true },
+    });
 
-    // 4. Generate AI insight
-    const insight = await aiService.generateInsight(
-      payload.businessType,
-      locationData,
-    );
-
-    // 5. Build result
     const result: AnalysisResult = {
       id: crypto.randomUUID(),
-      locationName: locationData.kelurahan,
-      kecamatan: locationData.kecamatan,
-      businessType: payload.businessType,
-      finalScore,
-      clusterLabel: locationData.clusterLabel,
-      confidenceLevel,
-      metrics: {
-        trafficScore: locationData.trafficScore,
-        transitScore: locationData.transitScore,
-        poiScore: locationData.poiScore,
-        competitorScore: locationData.competitorCount,
-        compRatio: locationData.compRatio,
-      },
+      streetName: recommendation.target_jalan,
+      kelurahan,
+      kecamatan: street?.kecamatan ?? "",
+      bizType,
+      skorPotensi: recommendation.skor_potensi_persen,
+      bobotFitur: recommendation.bobot_fitur,
+      nilaiFiturJalan: recommendation.nilai_fitur_jalan,
+      rekomendasiAlternatif: recommendation.rekomendasi_alternatif,
       insight,
       createdAt: new Date().toISOString(),
     };
@@ -73,7 +74,7 @@ export const analysisService = {
 
     // 7. Save to history if authenticated
     if (userId) {
-      await this._saveToHistory(result, payload, userId).catch(() => {});
+      await this._saveToHistory(result, userId).catch(() => {});
     }
 
     return result;
@@ -85,34 +86,46 @@ export const analysisService = {
 
     return {
       id: record.id,
-      locationName: record.locationName,
+      streetName: record.streetName,
+      kelurahan: record.kelurahan,
       kecamatan: record.kecamatan,
-      businessType: record.businessType,
-      finalScore: record.resultScore,
-      clusterLabel: record.clusterLabel,
-      confidenceLevel: record.confidenceLevel,
-      metrics: {
-        trafficScore: record.trafficScore,
-        transitScore: record.transitScore,
-        poiScore: record.poiScore,
-        competitorScore: record.competitorScore,
-        compRatio: record.compRatio,
+      bizType: record.bizType,
+      skorPotensi: record.skorPotensi,
+      bobotFitur: {
+        traffic_score: record.bobotTraffic,
+        transit_score: record.bobotTransit,
+        poi_score: record.bobotPoi,
+        competitor: record.bobotCompetitor,
+        comp_ratio: record.bobotCompRatio,
       },
-      insight: record.insight,
+      nilaiFiturJalan: {
+        traffic_score: record.trafficScore,
+        transit_score: record.transitScore,
+        poi_score: record.poiScore,
+        competitor: record.competitor,
+        comp_ratio: record.compRatio,
+      },
+      rekomendasiAlternatif:
+        (record.rekomendasiAlternatif as unknown as AnalysisResult["rekomendasiAlternatif"]) ??
+        [],
+      insight: record.aiInsight ?? "",
       createdAt: record.createdAt.toISOString(),
     };
   },
 
-  async getHistory(userId: string, filters: Record<string, string | undefined>) {
+  async getHistory(
+    userId: string,
+    filters: Record<string, string | undefined>,
+  ) {
     const result = await analysisRepository.findByUserId(userId, filters);
     return {
       total: result.total,
       data: result.data.map((item) => ({
         id: item.id,
-        locationName: item.locationName,
-        businessType: item.businessType,
-        finalScore: item.resultScore,
-        clusterLabel: item.clusterLabel,
+        streetName: item.streetName,
+        kelurahan: item.kelurahan,
+        bizType: item.bizType,
+        skorPotensi: item.skorPotensi,
         isSaved: item.isSaved,
         createdAt: item.createdAt.toISOString(),
       })),
@@ -121,36 +134,37 @@ export const analysisService = {
 
   async toggleBookmark(id: string, userId: string) {
     const result = await analysisRepository.toggleBookmark(id, userId);
-    if (!result) throw new AppError("Riwayat tidak ditemukan", 404, "NOT_FOUND");
+    if (!result)
+      throw new AppError("Riwayat tidak ditemukan", 404, "NOT_FOUND");
     return result;
   },
 
   async deleteHistory(id: string, userId: string) {
     const deleted = await analysisRepository.deleteByIdAndUser(id, userId);
-    if (!deleted) throw new AppError("Riwayat tidak ditemukan", 404, "NOT_FOUND");
+    if (!deleted)
+      throw new AppError("Riwayat tidak ditemukan", 404, "NOT_FOUND");
   },
 
-  async _saveToHistory(
-    result: AnalysisResult,
-    payload: AnalysisRequest,
-    userId: string,
-  ) {
+  async _saveToHistory(result: AnalysisResult, userId: string) {
     await analysisRepository.create({
       userId,
-      businessType: result.businessType,
-      resultScore: result.finalScore,
-      clusterLabel: result.clusterLabel,
-      insight: result.insight,
-      confidenceLevel: result.confidenceLevel,
-      locationName: result.locationName,
+      streetName: result.streetName,
+      kelurahan: result.kelurahan,
       kecamatan: result.kecamatan,
-      latitude: payload.latitude,
-      longitude: payload.longitude,
-      trafficScore: result.metrics.trafficScore,
-      transitScore: result.metrics.transitScore,
-      poiScore: result.metrics.poiScore,
-      competitorScore: result.metrics.competitorScore,
-      compRatio: result.metrics.compRatio,
+      bizType: result.bizType,
+      skorPotensi: result.skorPotensi,
+      trafficScore: result.nilaiFiturJalan.traffic_score,
+      transitScore: result.nilaiFiturJalan.transit_score,
+      poiScore: result.nilaiFiturJalan.poi_score,
+      competitor: result.nilaiFiturJalan.competitor,
+      compRatio: result.nilaiFiturJalan.comp_ratio,
+      bobotTraffic: result.bobotFitur.traffic_score,
+      bobotTransit: result.bobotFitur.transit_score,
+      bobotPoi: result.bobotFitur.poi_score,
+      bobotCompetitor: result.bobotFitur.competitor,
+      bobotCompRatio: result.bobotFitur.comp_ratio,
+      rekomendasiAlternatif: result.rekomendasiAlternatif as unknown as import("@prisma/client").Prisma.JsonValue,
+      aiInsight: result.insight,
     });
   },
 };
