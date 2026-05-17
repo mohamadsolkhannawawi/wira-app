@@ -130,9 +130,9 @@ export function SearchCard({ onSubmit, isLoading }: SearchCardProps) {
             
             const data = await findNearestLocation(lat, lng);
             
-            // If nearest location is more than 15km away, they are likely outside Semarang
-            if (!data.nearest || data.distanceKm > 15) {
-              setValidationError("Lokasi Anda saat ini terdeteksi berada di luar area layanan aplikasi (di luar radius Semarang). Silakan pilih kelurahan dan nama jalan secara manual dari menu dropdown.");
+            // If nearest location centroid is more than 3km away, they are very likely outside Semarang limits
+            if (!data.nearest || data.distanceKm > 3) {
+              setValidationError("Lokasi Anda saat ini terdeteksi berada di luar area layanan aplikasi (di luar radius Kota Semarang). Silakan pilih kelurahan secara manual dari menu dropdown.");
             } else {
               setKelurahan(data.nearest.kelurahan);
             }
