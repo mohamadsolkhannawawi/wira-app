@@ -34,34 +34,39 @@ export interface AppInfoData {
 
 export type BusinessType = string;
 
-export type ClusterLabel = "RAMAI" | "POTENSIAL" | "SEPI";
+export interface FeatureBlock {
+  traffic_score: number;
+  transit_score: number;
+  poi_score: number;
+  competitor: number;
+  comp_ratio: number;
+}
 
-export type ConfidenceLevel = "TINGGI" | "SEDANG" | "RENDAH";
-
-export interface LocationMetrics {
-  trafficScore: number;
-  transitScore: number;
-  poiScore: number;
-  competitorScore: number;
-  compRatio: number;
+export interface AlternativeRecommendation {
+  peringkat: number;
+  nama_jalan: string;
+  kecamatan: string;
+  skor_potensi_persen: number;
+  bobot_fitur: FeatureBlock;
+  nilai_fitur_jalan: FeatureBlock;
 }
 
 export interface AnalysisRequest {
-  businessType: BusinessType;
-  latitude: number;
-  longitude: number;
-  kelurahan?: string;
+  bizType: BusinessType;
+  kelurahan: string;
+  streetName: string;
 }
 
 export interface AnalysisResult {
   id: string;
-  locationName: string;
+  streetName: string;
+  kelurahan: string;
   kecamatan: string;
-  businessType: BusinessType;
-  finalScore: number;
-  clusterLabel: ClusterLabel;
-  confidenceLevel: ConfidenceLevel;
-  metrics: LocationMetrics;
+  bizType: BusinessType;
+  skorPotensi: number;
+  bobotFitur: FeatureBlock;
+  nilaiFiturJalan: FeatureBlock;
+  rekomendasiAlternatif: AlternativeRecommendation[];
   insight: string;
   createdAt: string;
 }
@@ -71,31 +76,16 @@ export interface AnalysisResponse {
   data: AnalysisResult;
 }
 
-export interface LocationSummary {
-  id: string;
+export interface KelurahanOption {
+  kelurahan: string;
+}
+
+export interface StreetOption {
+  namaJalan: string;
   kelurahan: string;
   kecamatan: string;
-  latitude: number;
-  longitude: number;
-  finalScore: number;
-  clusterLabel: ClusterLabel;
-}
-
-export interface LocationDetail extends LocationSummary {
-  businessType: BusinessType;
-  confidenceLevel: ConfidenceLevel;
-  metrics: LocationMetrics;
-}
-
-export interface LocationsResponse {
-  locations: LocationSummary[];
-}
-
-export interface CompareLocationsResponse {
-  businessType: BusinessType;
-  locations: LocationDetail[];
-  recommended: string;
-  narrative: string;
+  latCentroid: number;
+  lngCentroid: number;
 }
 
 export interface AuthUser {
@@ -121,12 +111,12 @@ export interface PaginatedResponse<T> {
   page?: number;
 }
 
-export interface SearchHistorySummary {
+export interface AnalysisHistorySummary {
   id: string;
-  locationName: string;
-  businessType: BusinessType;
-  finalScore: number;
-  clusterLabel: ClusterLabel;
+  streetName: string;
+  kelurahan: string;
+  bizType: BusinessType;
+  skorPotensi: number;
   isSaved: boolean;
   createdAt: string;
 }
