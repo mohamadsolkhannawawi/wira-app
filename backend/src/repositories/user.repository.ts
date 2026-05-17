@@ -10,6 +10,10 @@ export const userRepository = {
     return prisma.user.findUnique({ where: { email } });
   },
 
+  async findByUsername(username: string): Promise<User | null> {
+    return prisma.user.findUnique({ where: { username } });
+  },
+
   async findById(id: string): Promise<User | null> {
     return prisma.user.findUnique({ where: { id } });
   },

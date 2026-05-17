@@ -11,7 +11,6 @@ export const userService = {
       email: user.email,
       name: user.name,
       role: user.role,
-      isVerified: user.isVerified,
       createdAt: user.createdAt.toISOString(),
     };
   },
@@ -31,7 +30,6 @@ export const userService = {
       email: updated.email,
       name: updated.name,
       role: updated.role,
-      isVerified: updated.isVerified,
       createdAt: updated.createdAt.toISOString(),
     };
   },

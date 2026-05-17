@@ -14,13 +14,14 @@ export const login = async (
 
 export const register = async (
   name: string,
+  username: string,
   email: string,
   password: string,
 ): Promise<AuthResponse> => {
   return requestJson<AuthResponse>("/auth/register", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ name, username, email, password }),
   });
 };
 

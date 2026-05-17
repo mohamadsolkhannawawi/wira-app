@@ -8,12 +8,13 @@ export const register = async (
   next: NextFunction,
 ): Promise<void> => {
   try {
-    const { email, password, name } = req.body as {
+    const { email, password, name, username } = req.body as {
       email: string;
       password: string;
       name?: string;
+      username?: string;
     };
-    const result = await authService.register(email, password, name);
+    const result = await authService.register(email, password, name, username);
     res.status(201).json(ok(result));
   } catch (err) {
     next(err);

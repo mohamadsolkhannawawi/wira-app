@@ -16,13 +16,25 @@ export const authService = {
     email: string,
     password: string,
     name?: string,
+    username?: string,
   ): Promise<AuthResponse> {
-    const existing = await userRepository.findByEmail(email);
-    if (existing) throw new AppError("Email sudah terdaftar", 409, "EMAIL_EXISTS");
+    if (!username || username.trim().length < 3) {
+      throw new AppError("Username minimal 3 karakter", 400, "USERNAME_INVALID");
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      throw new AppError("Username hanya boleh huruf, angka, dan underscore", 400, "USERNAME_INVALID_FORMAT");
+    }
+
+    const existingEmail = await userRepository.findByEmail(email);
+    if (existingEmail) throw new AppError("Email sudah terdaftar", 409, "EMAIL_EXISTS");
+
+    const existingUsername = await userRepository.findByUsername(username);
+    if (existingUsername) throw new AppError("Username sudah digunakan", 409, "USERNAME_EXISTS");
 
     const hashedPassword = await bcryptUtil.hashPassword(password);
     const user = await userRepository.create({
       email,
+      username,
       password: hashedPassword,
       name: name ?? null,
     });
